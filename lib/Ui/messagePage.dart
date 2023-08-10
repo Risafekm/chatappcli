@@ -1,8 +1,16 @@
+// ignore_for_file: unused_local_variable
+
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:chat_app_cli/models/userModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+import '../api/API.dart';
+import 'widget_reusable/messageCard.dart';
 
 class MessagePage extends StatefulWidget {
   final ChatUser user;
@@ -16,29 +24,82 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
+  List<MessageUser> list = [];
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Scaffold(
-          appBar: AppBar(
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            flexibleSpace: _appBar(),
-          ),
-          body: SingleChildScrollView(
-            child: Column(
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: SafeArea(
+        child: Scaffold(
+            appBar: AppBar(
+              elevation: 0,
+              automaticallyImplyLeading: false,
+              flexibleSpace: _appBar(),
+            ),
+            body: Column(
               children: [
-                _messageBody(),
+                Expanded(
+                  child: StreamBuilder(
+                    stream: API.getAllMessages(),
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      switch (snapshot.connectionState) {
+                        // data is loading
+                        case ConnectionState.waiting:
+                        case ConnectionState.none:
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        //all data is loaded
+                        case ConnectionState.active:
+                        case ConnectionState.done:
+                          final data = snapshot.data?.docs;
+
+                          list = data
+                                  .map<MessageUser>(
+                                      (e) => MessageUser.fromJson(e.data()))
+                                  .toList() ??
+                              [];
+                          list.add(MessageUser(
+                              toId: 'ghh',
+                              msg: 'Hi Risaf',
+                              read: '',
+                              type: Type.text,
+                              fromId: API.user.uid,
+                              send: '10.00 am'));
+                          list.add(MessageUser(
+                              toId: API.user.uid,
+                              msg:
+                                  'enthokke und visheshammmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
+                              read: '',
+                              type: Type.text,
+                              fromId: 'dgc',
+                              send: '10.10 am'));
+                          if (list.isNotEmpty) {
+                            return ListView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: list.length,
+                              itemBuilder: (context, index) {
+                                //messageCard
+                                return MessageCard(message: list[index]);
+                              },
+                            );
+                          } else {
+                            return const Center(
+                              child: Text('No data'),
+                            );
+                          }
+                      }
+                    },
+                  ),
+                ),
                 _bottomField(),
               ],
-            ),
-          )),
+            )),
+      ),
     );
   }
 
 // Text message input area and icons
-
   _bottomField() {
     return Row(
       children: [
@@ -56,6 +117,8 @@ class _MessagePageState extends State<MessagePage> {
                 const SizedBox(width: 10),
                 const Expanded(
                   child: TextField(
+                    keyboardType: TextInputType.multiline,
+                    maxLines: null,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       hintText: 'Type message...',
@@ -91,7 +154,6 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   //AppBar
-
   _appBar() {
     return Row(
       // mainAxisAlignment: MainAxisAlignment.spaceAround,
