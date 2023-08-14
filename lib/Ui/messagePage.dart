@@ -1,6 +1,5 @@
-// ignore_for_file: unused_local_variable
+// ignore_for_file: unused_local_variable, file_names
 
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:chat_app_cli/models/messageModel.dart';
@@ -24,7 +23,8 @@ class MessagePage extends StatefulWidget {
 }
 
 class _MessagePageState extends State<MessagePage> {
-  List<MessageUser> list = [];
+  List<MessageUser> _list = [];
+  final TextEditingController _textController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -40,52 +40,36 @@ class _MessagePageState extends State<MessagePage> {
               children: [
                 Expanded(
                   child: StreamBuilder(
-                    stream: API.getAllMessages(),
+                    stream: API.getAllMessage(widget.user),
                     builder: (BuildContext context, AsyncSnapshot snapshot) {
                       switch (snapshot.connectionState) {
                         // data is loading
                         case ConnectionState.waiting:
                         case ConnectionState.none:
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return const SizedBox();
                         //all data is loaded
                         case ConnectionState.active:
                         case ConnectionState.done:
                           final data = snapshot.data?.docs;
 
-                          list = data
+                          _list = data
                                   .map<MessageUser>(
                                       (e) => MessageUser.fromJson(e.data()))
                                   .toList() ??
                               [];
-                          list.add(MessageUser(
-                              toId: 'ghh',
-                              msg: 'Hi Risaf',
-                              read: '',
-                              type: Type.text,
-                              fromId: API.user.uid,
-                              send: '10.00 am'));
-                          list.add(MessageUser(
-                              toId: API.user.uid,
-                              msg:
-                                  'enthokke und visheshammmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm',
-                              read: '',
-                              type: Type.text,
-                              fromId: 'dgc',
-                              send: '10.10 am'));
-                          if (list.isNotEmpty) {
+
+                          if (_list.isNotEmpty) {
                             return ListView.builder(
                               physics: const BouncingScrollPhysics(),
-                              itemCount: list.length,
+                              itemCount: _list.length,
                               itemBuilder: (context, index) {
                                 //messageCard
-                                return MessageCard(message: list[index]);
+                                return MessageCard(message: _list[index]);
                               },
                             );
                           } else {
                             return const Center(
-                              child: Text('No data'),
+                              child: Text('Say Hi'),
                             );
                           }
                       }
@@ -104,50 +88,57 @@ class _MessagePageState extends State<MessagePage> {
     return Row(
       children: [
         Expanded(
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: Row(
-              children: [
-                IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.emoji_emotions,
-                        color: Colors.blueAccent, size: 26)),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: TextField(
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Type message...',
-                      hintStyle: TextStyle(fontSize: 16),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 8.0, bottom: 3.0),
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.emoji_emotions,
+                          color: Colors.blueAccent, size: 26)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: TextField(
+                      controller: _textController,
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Type message...',
+                        hintStyle: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
+                  IconButton(
+                      onPressed: () {},
+                      icon: const Icon(Icons.attach_file_sharp,
+                          color: Colors.blueAccent, size: 26)),
+                  IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.attach_file_sharp,
-                        color: Colors.blueAccent, size: 26)),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(CupertinoIcons.camera_circle_fill,
-                      color: Colors.blueAccent, size: 31),
-                ),
-              ],
+                    icon: const Icon(CupertinoIcons.camera_circle_fill,
+                        color: Colors.blueAccent, size: 31),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-          child: MaterialButton(
-            minWidth: 20,
-            onPressed: () {},
-            color: Colors.lightGreen,
-            shape: const CircleBorder(),
-            child: const Icon(Icons.send, size: 26, color: Colors.white),
-          ),
+        MaterialButton(
+          minWidth: 0,
+          onPressed: () {
+            if (_textController.text.isNotEmpty) {
+              API.sendMessage(widget.user, _textController.text);
+              _textController.text = '';
+              log(API.getAllMessage(widget.user) as String);
+            }
+          },
+          color: Colors.lightGreen,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.send, size: 26, color: Colors.white),
         ),
       ],
     );

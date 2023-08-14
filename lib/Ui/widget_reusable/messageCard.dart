@@ -1,4 +1,8 @@
-import 'package:chat_app_cli/main.dart';
+// ignore_for_file: file_names
+
+import 'dart:developer';
+
+import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:flutter/material.dart';
 
@@ -16,12 +20,17 @@ class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
     return API.user.uid == widget.message.fromId
-        ? _blueMessage()
-        : _greenMessage();
+        ? _greenMessage()
+        : _blueMessage();
   }
 
   // from message
+
   Widget _blueMessage() {
+    if (widget.message.read.isEmpty) {
+      API.updateMessageReadStatus(widget.message);
+      log('Message read updated');
+    }
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -49,31 +58,52 @@ class _MessageCardState extends State<MessageCard> {
         // send time
 
         Padding(
-          padding: const EdgeInsets.only(right: 8.0, top: 20),
-          child: Text(
-            widget.message.send,
-            style: const TextStyle(fontSize: 15, color: Colors.black54),
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            children: [
+              Text(
+                TimeUntil.getTimeUntil(context, widget.message.send),
+                style: const TextStyle(fontSize: 15, color: Colors.black54),
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width * .02),
+              const Icon(
+                Icons.done_all_outlined,
+                size: 20,
+                color: Colors.blue,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width * .04),
+            ],
           ),
         ),
       ],
     );
   }
 
-  //to message
-  _greenMessage() {
+  //To message
+  Widget _greenMessage() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         // send time
 
         Padding(
-          padding: const EdgeInsets.only(left: 8.0, top: 20),
-          child: Text(
-            widget.message.send,
-            style: const TextStyle(fontSize: 15, color: Colors.black54),
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Row(
+            children: [
+              SizedBox(width: MediaQuery.of(context).size.width * .04),
+              const Icon(
+                Icons.done_all_outlined,
+                size: 20,
+                color: Colors.blue,
+              ),
+              SizedBox(width: MediaQuery.of(context).size.width * .02),
+              Text(
+                TimeUntil.getTimeUntil(context, widget.message.send),
+                style: const TextStyle(fontSize: 15, color: Colors.black54),
+              ),
+            ],
           ),
         ),
-
         // message box
 
         Flexible(

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:chat_app_cli/Services/auth_service.dart';
 import 'package:chat_app_cli/Ui/profilePage.dart';
 import 'package:chat_app_cli/Ui/widget_reusable/chatuserCard.dart';

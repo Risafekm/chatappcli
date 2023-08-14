@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:chat_app_cli/Ui/messagePage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 class MessageUser {
   MessageUser({
     required this.toId,
@@ -7,12 +9,13 @@ class MessageUser {
     required this.fromId,
     required this.send,
   });
-  late final String toId;
-  late final String msg;
-  late final String read;
-  late final String fromId;
-  late final String send;
-  late final Type type;
+
+  late String toId;
+  late String msg;
+  late String read;
+  late String fromId;
+  late String send;
+  late Type type;
 
   MessageUser.fromJson(Map<String, dynamic> json) {
     toId = json['toId'].toString();
@@ -28,7 +31,7 @@ class MessageUser {
     data['toId'] = toId;
     data['msg'] = msg;
     data['read'] = read;
-    data['type'] = type;
+    data['type'] = type.name;
     data['fromId'] = fromId;
     data['send'] = send;
     return data;
