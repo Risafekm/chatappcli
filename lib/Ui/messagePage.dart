@@ -1,6 +1,7 @@
-// ignore_for_file: unused_local_variable, file_names
+// ignore_for_file: unused_local_variable, file_names, use_build_context_synchronously
 
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:chat_app_cli/models/userModel.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/foundation.dart' as foundation;
+import 'package:image_picker/image_picker.dart';
 import '../api/API.dart';
 import 'widget_reusable/messageCard.dart';
 
@@ -27,6 +29,20 @@ class _MessagePageState extends State<MessagePage> {
   List<MessageUser> _list = [];
   final TextEditingController _textController = TextEditingController();
   bool isEmoji = false;
+  late String _image;
+
+  void selectCamera() async {
+    final ImagePicker picker = ImagePicker();
+    XFile? image = await picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      log('Image path: ${image.path}');
+      setState(() {
+        _image = image.path;
+      });
+      await API.sendChatImage(widget.user, File(image.path));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -105,8 +121,6 @@ class _MessagePageState extends State<MessagePage> {
                                   : 1.0),
                           verticalSpacing: 0,
                           horizontalSpacing: 0,
-                          gridPadding: EdgeInsets.zero,
-                          initCategory: Category.RECENT,
                           bgColor: const Color(0xFFF2F2F2),
                           indicatorColor: Colors.blue,
                           iconColor: Colors.grey,
@@ -183,7 +197,9 @@ class _MessagePageState extends State<MessagePage> {
                       icon: const Icon(Icons.attach_file_sharp,
                           color: Colors.blueAccent, size: 26)),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      selectCamera();
+                    },
                     icon: const Icon(CupertinoIcons.camera_circle_fill,
                         color: Colors.blueAccent, size: 31),
                   ),
@@ -196,7 +212,7 @@ class _MessagePageState extends State<MessagePage> {
           minWidth: 0,
           onPressed: () {
             if (_textController.text.isNotEmpty) {
-              API.sendMessage(widget.user, _textController.text);
+              API.sendMessage(widget.user, _textController.text, Type.text);
               _textController.text = '';
               log(API.getAllMessage(widget.user) as String);
             }

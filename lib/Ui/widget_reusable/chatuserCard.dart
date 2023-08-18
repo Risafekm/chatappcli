@@ -71,6 +71,7 @@ class _ChatUserCardState extends State<ChatUserCard> {
                   ),
                   subtitle: Text(
                     _message != null ? _message!.msg : widget.user.about,
+                    maxLines: 1,
                     style:
                         GoogleFonts.acme(color: Colors.black54, fontSize: 12),
                   ),

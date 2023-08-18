@@ -117,7 +117,8 @@ class API {
   }
 
   // for sending message
-  static Future<void> sendMessage(ChatUser chatUser, String msg) async {
+  static Future<void> sendMessage(
+      ChatUser chatUser, String msg, Type type) async {
     //message sending time (also used as id)
     final time = DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -127,7 +128,7 @@ class API {
         toId: chatUser.id,
         msg: msg,
         read: '',
-        type: Type.text,
+        type: type,
         fromId: user.uid,
         send: time);
 
@@ -155,5 +156,23 @@ class API {
         .orderBy('send', descending: true)
         .limit(1)
         .snapshots();
+  }
+  // chat image firebase lek send cheyyan veendiyulla function
+
+  static Future<void> sendChatImage(ChatUser chatUser, File file) async {
+    final extension = file.path.split('.').last;
+    log('extension:${extension}');
+    final result = storage.ref().child(
+        'image/${getConversationID(chatUser.id)} /${DateTime.now().millisecondsSinceEpoch}.$extension');
+    final uploadImage = await result
+        .putFile(file, SettableMetadata(contentType: 'image/${extension}'))
+        .then((p0) {
+      log('byte transfered :${p0.bytesTransferred / 1000}');
+    });
+    
+    //updating image in firebase database
+
+    final imageUrl = await result.getDownloadURL();
+    await sendMessage(chatUser, imageUrl, Type.image);
   }
 }

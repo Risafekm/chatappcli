@@ -2,6 +2,7 @@
 
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:flutter/material.dart';
@@ -38,20 +39,52 @@ class _MessageCardState extends State<MessageCard> {
 
         Flexible(
           child: Container(
-            padding: EdgeInsets.all(MediaQuery.of(context).size.height * .04),
+            padding: widget.message.type == Type.image
+                ? EdgeInsets.all(MediaQuery.of(context).size.height * .01)
+                : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.height * .04,
                 vertical: MediaQuery.of(context).size.height * .01),
             decoration: BoxDecoration(
               color: const Color.fromARGB(255, 192, 211, 244),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-                bottomRight: Radius.circular(30),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
               ),
               border: Border.all(color: Colors.blue),
             ),
-            child: Text(widget.message.msg),
+            child: widget.message.type == Type.text
+                ? Text(
+                    widget.message.msg,
+                    style: const TextStyle(fontSize: 18),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      widget.message.msg,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return SizedBox(
+                          height: 180,
+                          width: 180,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              backgroundColor: Colors.amber,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ),
 
@@ -108,7 +141,9 @@ class _MessageCardState extends State<MessageCard> {
 
         Flexible(
           child: Container(
-            padding: EdgeInsets.all(MediaQuery.of(context).size.height * .04),
+            padding: widget.message.type == Type.image
+                ? EdgeInsets.all(MediaQuery.of(context).size.height * .01)
+                : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.height * .04,
                 vertical: MediaQuery.of(context).size.height * .01),
@@ -116,12 +151,42 @@ class _MessageCardState extends State<MessageCard> {
               border: Border.all(color: Colors.green),
               color: const Color.fromARGB(255, 174, 235, 205),
               borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(30),
-                topRight: Radius.circular(30),
-                bottomLeft: Radius.circular(30),
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+                bottomLeft: Radius.circular(20),
               ),
             ),
-            child: Text(widget.message.msg),
+            child: widget.message.type == Type.text
+                ? Text(
+                    widget.message.msg,
+                    style: const TextStyle(fontSize: 18),
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      widget.message.msg,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) {
+                          return child;
+                        }
+                        return SizedBox(
+                          height: 180,
+                          width: 180,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              backgroundColor: Colors.amber,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ),
       ],
