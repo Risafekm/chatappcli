@@ -33,6 +33,7 @@ dependencies:
   firebase_auth: ^4.7.2
   firebase_core: ^2.15.0
   firebase_storage: ^11.2.5
+  emoji_picker_flutter: ^1.6.1
   flutter:
     sdk: flutter
   google_fonts: null

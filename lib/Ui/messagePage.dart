@@ -4,10 +4,11 @@ import 'dart:developer';
 
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:chat_app_cli/models/userModel.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:flutter/foundation.dart' as foundation;
 import '../api/API.dart';
 import 'widget_reusable/messageCard.dart';
 
@@ -25,60 +26,114 @@ class MessagePage extends StatefulWidget {
 class _MessagePageState extends State<MessagePage> {
   List<MessageUser> _list = [];
   final TextEditingController _textController = TextEditingController();
+  bool isEmoji = false;
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: SafeArea(
-        child: Scaffold(
-            appBar: AppBar(
-              elevation: 0,
-              automaticallyImplyLeading: false,
-              flexibleSpace: _appBar(),
-            ),
-            body: Column(
-              children: [
-                Expanded(
-                  child: StreamBuilder(
-                    stream: API.getAllMessage(widget.user),
-                    builder: (BuildContext context, AsyncSnapshot snapshot) {
-                      switch (snapshot.connectionState) {
-                        // data is loading
-                        case ConnectionState.waiting:
-                        case ConnectionState.none:
-                          return const SizedBox();
-                        //all data is loaded
-                        case ConnectionState.active:
-                        case ConnectionState.done:
-                          final data = snapshot.data?.docs;
+        child: WillPopScope(
+          onWillPop: () {
+            if (isEmoji) {
+              setState(() {
+                isEmoji = !isEmoji;
+              });
+              return Future.value(false);
+            } else {
+              return Future.value(true);
+            }
+          },
+          child: Scaffold(
+              appBar: AppBar(
+                elevation: 0,
+                automaticallyImplyLeading: false,
+                flexibleSpace: _appBar(),
+              ),
+              body: Column(
+                children: [
+                  Expanded(
+                    child: StreamBuilder(
+                      stream: API.getAllMessage(widget.user),
+                      builder: (BuildContext context, AsyncSnapshot snapshot) {
+                        switch (snapshot.connectionState) {
+                          // data is loading
+                          case ConnectionState.waiting:
+                          case ConnectionState.none:
+                            return const SizedBox();
+                          //all data is loaded
+                          case ConnectionState.active:
+                          case ConnectionState.done:
+                            final data = snapshot.data?.docs;
 
-                          _list = data
-                                  .map<MessageUser>(
-                                      (e) => MessageUser.fromJson(e.data()))
-                                  .toList() ??
-                              [];
+                            _list = data
+                                    .map<MessageUser>(
+                                        (e) => MessageUser.fromJson(e.data()))
+                                    .toList() ??
+                                [];
 
-                          if (_list.isNotEmpty) {
-                            return ListView.builder(
-                              physics: const BouncingScrollPhysics(),
-                              itemCount: _list.length,
-                              itemBuilder: (context, index) {
-                                //messageCard
-                                return MessageCard(message: _list[index]);
-                              },
-                            );
-                          } else {
-                            return const Center(
-                              child: Text('Say Hi'),
-                            );
-                          }
-                      }
-                    },
+                            if (_list.isNotEmpty) {
+                              return ListView.builder(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: _list.length,
+                                itemBuilder: (context, index) {
+                                  //messageCard
+                                  return MessageCard(message: _list[index]);
+                                },
+                              );
+                            } else {
+                              return const Center(
+                                child: Text('Say Hi'),
+                              );
+                            }
+                        }
+                      },
+                    ),
                   ),
-                ),
-                _bottomField(),
-              ],
-            )),
+                  _bottomField(),
+                  if (isEmoji)
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * .30,
+                      child: EmojiPicker(
+                        onBackspacePressed: () {},
+                        textEditingController: _textController,
+                        config: Config(
+                          columns: 7,
+                          emojiSizeMax: 32 *
+                              (foundation.defaultTargetPlatform ==
+                                      TargetPlatform.iOS
+                                  ? 1.30
+                                  : 1.0),
+                          verticalSpacing: 0,
+                          horizontalSpacing: 0,
+                          gridPadding: EdgeInsets.zero,
+                          initCategory: Category.RECENT,
+                          bgColor: const Color(0xFFF2F2F2),
+                          indicatorColor: Colors.blue,
+                          iconColor: Colors.grey,
+                          iconColorSelected: Colors.blue,
+                          backspaceColor: Colors.blue,
+                          skinToneDialogBgColor: Colors.white,
+                          skinToneIndicatorColor: Colors.grey,
+                          enableSkinTones: true,
+                          recentTabBehavior: RecentTabBehavior.RECENT,
+                          recentsLimit: 28,
+                          noRecents: const Text(
+                            'No Recents',
+                            style:
+                                TextStyle(fontSize: 20, color: Colors.black26),
+                            textAlign: TextAlign.center,
+                          ), // Needs to be const Widget
+                          loadingIndicator: const SizedBox
+                              .shrink(), // Needs to be const Widget
+                          tabIndicatorAnimDuration: kTabScrollDuration,
+                          categoryIcons: const CategoryIcons(),
+                          buttonMode: ButtonMode.MATERIAL,
+                        ),
+                      ),
+                    ),
+                ],
+              )),
+        ),
       ),
     );
   }
@@ -97,12 +152,22 @@ class _MessagePageState extends State<MessagePage> {
               child: Row(
                 children: [
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        FocusScope.of(context).unfocus();
+                        setState(() {
+                          isEmoji = !isEmoji;
+                        });
+                      },
                       icon: const Icon(Icons.emoji_emotions,
                           color: Colors.blueAccent, size: 26)),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
+                      onTap: () {
+                        if (isEmoji) {
+                          setState(() => isEmoji = !isEmoji);
+                        }
+                      },
                       controller: _textController,
                       keyboardType: TextInputType.multiline,
                       maxLines: null,

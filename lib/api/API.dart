@@ -136,10 +136,24 @@ class API {
     await ref.doc(time).set(message.toJson());
   }
 
+  // update message read status => time display cheyyan
+
   static Future<void> updateMessageReadStatus(MessageUser message) async {
     fireStore
         .collection('chats/${getConversationID(message.fromId)}/messages/')
         .doc(message.send)
         .update({'read': DateTime.now().millisecondsSinceEpoch.toString()});
+  }
+
+  // last message => last message user nte listTile il show cheyyikkan veendi update message nu \
+  //last message mathram pick cheyyunnathu
+
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getLastMessage(
+      ChatUser user) {
+    return fireStore
+        .collection('chats/${getConversationID(user.id)}/messages/')
+        .orderBy('send', descending: true)
+        .limit(1)
+        .snapshots();
   }
 }

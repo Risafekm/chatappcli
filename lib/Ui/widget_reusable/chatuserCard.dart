@@ -1,6 +1,9 @@
 // ignore_for_file: file_names
 
 import 'package:chat_app_cli/Ui/messagePage.dart';
+import 'package:chat_app_cli/api/API.dart';
+import 'package:chat_app_cli/helper/timeUntil.dart';
+import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -19,6 +22,8 @@ class ChatUserCard extends StatefulWidget {
 }
 
 class _ChatUserCardState extends State<ChatUserCard> {
+  MessageUser? _message;
+  List<MessageUser> _list = [];
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -32,37 +37,61 @@ class _ChatUserCardState extends State<ChatUserCard> {
                   builder: (context) => MessagePage(user: widget.user)));
         },
         child: Container(
-          height: 80,
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-          child: ListTile(
-              leading: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: Colors.grey,
-                  image: DecorationImage(
-                      image: NetworkImage(widget.user.image),
-                      fit: BoxFit.cover),
-                  borderRadius: BorderRadius.circular(120),
-                ),
-              ),
-              title: Text(
-                widget.user.name,
-                style: GoogleFonts.acme(color: Colors.black87, fontSize: 18),
-              ),
-              subtitle: Text(
-                widget.user.email,
-                style: GoogleFonts.acme(color: Colors.black54, fontSize: 12),
-              ),
-              trailing: Container(
-                height: 10,
-                width: 10,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: Colors.greenAccent.shade400,
-                ),
-              )),
-        ),
+            height: 80,
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: StreamBuilder(
+              stream: API.getLastMessage(widget.user),
+              builder: (context, snapshot) {
+                final data = snapshot.data?.docs;
+
+                _list = data
+                        ?.map<MessageUser>(
+                            (e) => MessageUser.fromJson(e.data()))
+                        .toList() ??
+                    [];
+
+                if (_list.isNotEmpty) _message = _list[0];
+
+                return ListTile(
+                  leading: Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.grey,
+                      image: DecorationImage(
+                          image: NetworkImage(widget.user.image),
+                          fit: BoxFit.cover),
+                      borderRadius: BorderRadius.circular(120),
+                    ),
+                  ),
+                  title: Text(
+                    widget.user.name,
+                    style:
+                        GoogleFonts.acme(color: Colors.black87, fontSize: 18),
+                  ),
+                  subtitle: Text(
+                    _message != null ? _message!.msg : widget.user.about,
+                    style:
+                        GoogleFonts.acme(color: Colors.black54, fontSize: 12),
+                  ),
+                  trailing: _message == null
+                      ? null
+                      : _message!.read.isEmpty &&
+                              _message?.fromId != API.user.uid
+                          ? Container(
+                              height: 10,
+                              width: 10,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: Colors.greenAccent.shade400,
+                              ),
+                            )
+                          : Text(
+                              TimeUntil.getLastMessage(context, _message!.send),
+                            ),
+                );
+              },
+            )),
       ),
     );
   }
