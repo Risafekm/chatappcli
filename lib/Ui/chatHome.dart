@@ -1,4 +1,6 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, curly_braces_in_flow_control_structures
+
+import 'dart:developer';
 
 import 'package:chat_app_cli/Services/auth_service.dart';
 import 'package:chat_app_cli/Ui/profilePage.dart';
@@ -7,6 +9,7 @@ import 'package:chat_app_cli/api/API.dart';
 import 'package:chat_app_cli/models/userModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class ChatHome extends StatefulWidget {
@@ -25,6 +28,16 @@ class _ChatHomeState extends State<ChatHome> {
   @override
   void initState() {
     API.selfInfo();
+    SystemChannels.lifecycle.setMessageHandler((message) {
+      log('Message:$message');
+      if (API.auth.currentUser != null) if (message
+          .toString()
+          .contains('resume')) {
+        API.updateActiveStatus(true);
+      }
+      if (message.toString().contains('pause')) API.updateActiveStatus(false);
+      return Future.value(message);
+    });
     super.initState();
   }
 

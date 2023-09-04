@@ -1,6 +1,9 @@
 // ignore_for_file: file_names
 
+import 'dart:developer';
+
 import 'package:chat_app_cli/Ui/messagePage.dart';
+import 'package:chat_app_cli/Ui/widget_reusable/viewProfilePic.dart';
 import 'package:chat_app_cli/api/API.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
@@ -53,15 +56,28 @@ class _ChatUserCardState extends State<ChatUserCard> {
                 if (_list.isNotEmpty) _message = _list[0];
 
                 return ListTile(
-                  leading: Container(
-                    height: 40,
-                    width: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.grey,
-                      image: DecorationImage(
-                          image: NetworkImage(widget.user.image),
-                          fit: BoxFit.cover),
-                      borderRadius: BorderRadius.circular(120),
+                  leading: InkWell(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return ViewProfilePic(
+                            user: widget.user,
+                          );
+                        },
+                      );
+                      log('Clicked');
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.grey,
+                        image: DecorationImage(
+                            image: NetworkImage(widget.user.image),
+                            fit: BoxFit.cover),
+                        borderRadius: BorderRadius.circular(120),
+                      ),
                     ),
                   ),
                   title: Text(
@@ -70,7 +86,11 @@ class _ChatUserCardState extends State<ChatUserCard> {
                         GoogleFonts.acme(color: Colors.black87, fontSize: 18),
                   ),
                   subtitle: Text(
-                    _message != null ? _message!.msg : widget.user.about,
+                    _message != null
+                        ? _message!.type == Type.image
+                            ? 'image'
+                            : _message!.msg
+                        : widget.user.about,
                     maxLines: 1,
                     style:
                         GoogleFonts.acme(color: Colors.black54, fontSize: 12),

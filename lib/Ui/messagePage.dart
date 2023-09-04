@@ -1,8 +1,10 @@
-// ignore_for_file: unused_local_variable, file_names, use_build_context_synchronously
+// ignore_for_file: unused_local_variable, file_names, use_build_context_synchronously, unused_field
 
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chat_app_cli/Ui/widget_reusable/DetailProfileView.dart';
+import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:chat_app_cli/models/userModel.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -30,6 +32,7 @@ class _MessagePageState extends State<MessagePage> {
   final TextEditingController _textController = TextEditingController();
   bool isEmoji = false;
   late String _image;
+  List<ChatUser> list = [];
 
   void selectCamera() async {
     final ImagePicker picker = ImagePicker();
@@ -40,6 +43,16 @@ class _MessagePageState extends State<MessagePage> {
         _image = image.path;
       });
       await API.sendChatImage(widget.user, File(image.path));
+    }
+  }
+
+  void selectGallery() async {
+    final ImagePicker picker = ImagePicker();
+
+    List<XFile> image = await picker.pickMultiImage(imageQuality: 80);
+    for (var i in image) {
+      log('Image path: ${i.path}');
+      await API.sendChatImage(widget.user, File(i.path));
     }
   }
 
@@ -60,6 +73,7 @@ class _MessagePageState extends State<MessagePage> {
             }
           },
           child: Scaffold(
+              // backgroundColor: Color.fromARGB(238, 255, 255, 255),
               appBar: AppBar(
                 elevation: 0,
                 automaticallyImplyLeading: false,
@@ -67,6 +81,7 @@ class _MessagePageState extends State<MessagePage> {
               ),
               body: Column(
                 children: [
+                  const SizedBox(height: 10),
                   Expanded(
                     child: StreamBuilder(
                       stream: API.getAllMessage(widget.user),
@@ -89,6 +104,7 @@ class _MessagePageState extends State<MessagePage> {
 
                             if (_list.isNotEmpty) {
                               return ListView.builder(
+                                reverse: true,
                                 physics: const BouncingScrollPhysics(),
                                 itemCount: _list.length,
                                 itemBuilder: (context, index) {
@@ -153,6 +169,7 @@ class _MessagePageState extends State<MessagePage> {
   }
 
 // Text message input area and icons
+
   _bottomField() {
     return Row(
       children: [
@@ -193,7 +210,9 @@ class _MessagePageState extends State<MessagePage> {
                     ),
                   ),
                   IconButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        selectGallery();
+                      },
                       icon: const Icon(Icons.attach_file_sharp,
                           color: Colors.blueAccent, size: 26)),
                   IconButton(
@@ -226,65 +245,95 @@ class _MessagePageState extends State<MessagePage> {
   }
 
   //AppBar
+
   _appBar() {
-    return Row(
-      // mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-          child: MaterialButton(
-            minWidth: 30,
-            onPressed: () => Navigator.pop(context),
-            color: Colors.white70,
-            shape: const CircleBorder(),
-            child: const Icon(
-              CupertinoIcons.back,
-              size: 26,
-            ),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Container(
-          height: 43,
-          width: 43,
-          decoration: BoxDecoration(
-            color: Colors.blue,
-            borderRadius: BorderRadius.circular(100),
-          ),
-          child: Stack(
+    return StreamBuilder(
+      stream: API.getUserInfo(widget.user),
+      builder: (context, snapshot) {
+        final data = snapshot.data?.docs;
+
+        list =
+            data?.map<ChatUser>((e) => ChatUser.fromJson(e.data())).toList() ??
+                [];
+        return InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailsProfileViewPage(
+                  user: widget.user,
+                ),
+              ),
+            );
+          },
+          child: Row(
+            // mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100),
-                  child: Image.network(
-                    widget.user.image,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                child: MaterialButton(
+                  minWidth: 30,
+                  onPressed: () => Navigator.pop(context),
+                  color: Colors.white70,
+                  shape: const CircleBorder(),
+                  child: const Icon(
+                    CupertinoIcons.back,
+                    size: 26,
                   ),
                 ),
               ),
+              const SizedBox(width: 10),
+              Container(
+                height: 43,
+                width: 43,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(100),
+                        child: Image.network(
+                          widget.user.image,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 4),
+                  Text(
+                    list.isNotEmpty ? list[0].name : widget.user.name,
+                    style:
+                        GoogleFonts.acme(color: Colors.black87, fontSize: 18),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    list.isNotEmpty
+                        ? list[0].isOnline
+                            ? 'Online'
+                            : TimeUntil.getLastActiveTime(
+                                context: context,
+                                lastActive: widget.user.lastActive)
+                        : widget.user.about,
+                    style: const TextStyle(color: Colors.black45, fontSize: 14),
+                  ),
+                ],
+              ),
             ],
           ),
-        ),
-        const SizedBox(width: 20),
-        Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              widget.user.name,
-              style: GoogleFonts.acme(color: Colors.black87, fontSize: 18),
-            ),
-            const SizedBox(height: 2),
-            const Text(
-              'last active time',
-              style: TextStyle(color: Colors.black45, fontSize: 14),
-            ),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

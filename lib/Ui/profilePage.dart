@@ -78,13 +78,25 @@ class _ProfilePageState extends State<ProfilePage> {
                         ? Center(
                             child: Padding(
                               padding: const EdgeInsets.only(top: 25.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(100),
-                                child: Image.file(
-                                  File(_image!),
-                                  width: 160,
-                                  height: 160,
-                                  fit: BoxFit.cover,
+                              child: Container(
+                                height: 160,
+                                width: 160,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(100),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100),
+                                  child: Image.file(
+                                    File(_image!),
+                                    width: 160,
+                                    height: 160,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -99,6 +111,31 @@ class _ProfilePageState extends State<ProfilePage> {
                                   width: 160,
                                   height: 160,
                                   fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return SizedBox(
+                                      height: 180,
+                                      width: 180,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          backgroundColor: Colors.amber,
+                                          value: loadingProgress
+                                                      .expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -204,10 +241,15 @@ class _ProfilePageState extends State<ProfilePage> {
                                 backgroundColor: Colors.green.withOpacity(.8),
                                 behavior: SnackBarBehavior.floating),
                           );
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const ChatHome()));
+                          Future.delayed(
+                              const Duration(
+                                milliseconds: 500,
+                              ), () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const ChatHome()));
+                          });
                         });
                       }
                     },

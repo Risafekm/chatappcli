@@ -1,8 +1,6 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:flutter/material.dart';
@@ -20,9 +18,73 @@ class MessageCard extends StatefulWidget {
 class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
-    return API.user.uid == widget.message.fromId
-        ? _greenMessage()
-        : _blueMessage();
+    return InkWell(
+      onLongPress: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              elevation: 1,
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.message.type == Type.text
+                      ? iconText(
+                          text: 'Copy', color: Colors.black, icon: Icons.copy)
+                      : iconText(
+                          text: 'Download',
+                          color: Colors.black,
+                          icon: Icons.download),
+                  const SizedBox(height: 10),
+                  iconText(text: 'Edit', color: Colors.black, icon: Icons.edit),
+                  const SizedBox(height: 10),
+                  iconText(
+                      text: 'Delete', color: Colors.red, icon: Icons.delete),
+                  const SizedBox(height: 10),
+                ],
+              ),
+            );
+          },
+        );
+        log('Clicked');
+      },
+      child: API.user.uid == widget.message.fromId
+          ? _greenMessage()
+          : _blueMessage(),
+    );
+  }
+
+// alert box icons and text
+
+  Widget iconText(
+      {required String text, required IconData icon, required Color color}) {
+    return InkWell(
+      onTap: () {},
+      child: Container(
+        height: 45,
+        width: 150,
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: Colors.grey.shade300),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(
+                width: 20,
+              ),
+              Text(
+                text,
+                style: const TextStyle(fontSize: 12),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // from message
@@ -40,19 +102,25 @@ class _MessageCardState extends State<MessageCard> {
         Flexible(
           child: Container(
             padding: widget.message.type == Type.image
-                ? EdgeInsets.all(MediaQuery.of(context).size.height * .01)
+                ? null
                 : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.height * .04,
                 vertical: MediaQuery.of(context).size.height * .01),
             decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 192, 211, 244),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
-              ),
-              border: Border.all(color: Colors.blue),
+              color: Colors.lightBlueAccent,
+              borderRadius: widget.message.type == Type.image
+                  ? const BorderRadius.all(
+                      Radius.circular(20),
+                    )
+                  : const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                      bottomRight: Radius.circular(20),
+                    ),
+              border: widget.message.type == Type.image
+                  ? null
+                  : Border.all(color: Colors.grey),
             ),
             child: widget.message.type == Type.text
                 ? Text(
@@ -142,19 +210,25 @@ class _MessageCardState extends State<MessageCard> {
         Flexible(
           child: Container(
             padding: widget.message.type == Type.image
-                ? EdgeInsets.all(MediaQuery.of(context).size.height * .01)
+                ? null
                 : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.height * .04,
                 vertical: MediaQuery.of(context).size.height * .01),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.green),
-              color: const Color.fromARGB(255, 174, 235, 205),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
-                bottomLeft: Radius.circular(20),
-              ),
+              border: widget.message.type == Type.image
+                  ? null
+                  : Border.all(color: Colors.grey),
+              color: const Color.fromARGB(255, 17, 228, 207),
+              borderRadius: widget.message.type == Type.image
+                  ? const BorderRadius.all(
+                      Radius.circular(20),
+                    )
+                  : const BorderRadius.only(
+                      topLeft: Radius.circular(20),
+                      topRight: Radius.circular(20),
+                      bottomLeft: Radius.circular(20),
+                    ),
             ),
             child: widget.message.type == Type.text
                 ? Text(
