@@ -1,9 +1,11 @@
 // ignore_for_file: file_names
 
 import 'dart:developer';
+import 'package:chat_app_cli/Ui/widget_reusable/snackbarWidget.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../api/API.dart';
 
@@ -32,16 +34,43 @@ class _MessageCardState extends State<MessageCard> {
                 children: [
                   widget.message.type == Type.text
                       ? iconText(
-                          text: 'Copy', color: Colors.black, icon: Icons.copy)
+                          onTap: () async {
+                            await Clipboard.setData(
+                                    ClipboardData(text: widget.message.msg))
+                                .then((value) {
+                              Navigator.of(context).pop();
+                              WidgetSnackBar.snackBarWidget(context,
+                                  message: 'message copied');
+                            });
+                          },
+                          text: 'Copy',
+                          color: Colors.black,
+                          icon: Icons.copy)
                       : iconText(
                           text: 'Download',
                           color: Colors.black,
-                          icon: Icons.download),
-                  const SizedBox(height: 10),
-                  iconText(text: 'Edit', color: Colors.black, icon: Icons.edit),
+                          icon: Icons.download,
+                          onTap: () {}),
                   const SizedBox(height: 10),
                   iconText(
-                      text: 'Delete', color: Colors.red, icon: Icons.delete),
+                      text: 'Edit',
+                      color: Colors.black,
+                      icon: Icons.edit,
+                      onTap: () {}),
+                  const SizedBox(height: 10),
+                  iconText(
+                    onTap: () async {
+                      await API.deleteMessage(widget.message).then((value) {
+                        Navigator.of(context).pop();
+                        WidgetSnackBar.snackBarWidget(context,
+                            message: 'deleted message');
+                        log('clicked');
+                      });
+                    },
+                    text: 'Delete',
+                    color: Colors.red,
+                    icon: Icons.delete,
+                  ),
                   const SizedBox(height: 10),
                 ],
               ),
@@ -59,9 +88,12 @@ class _MessageCardState extends State<MessageCard> {
 // alert box icons and text
 
   Widget iconText(
-      {required String text, required IconData icon, required Color color}) {
+      {required String text,
+      required IconData icon,
+      required Color color,
+      required VoidCallback onTap}) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         height: 45,
         width: 150,
@@ -103,9 +135,9 @@ class _MessageCardState extends State<MessageCard> {
           child: Container(
             padding: widget.message.type == Type.image
                 ? null
-                : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
+                : EdgeInsets.all(MediaQuery.of(context).size.height * .019),
             margin: EdgeInsets.symmetric(
-                horizontal: MediaQuery.of(context).size.height * .04,
+                horizontal: MediaQuery.of(context).size.height * .03,
                 vertical: MediaQuery.of(context).size.height * .01),
             decoration: BoxDecoration(
               color: Colors.lightBlueAccent,
@@ -167,11 +199,17 @@ class _MessageCardState extends State<MessageCard> {
                 style: const TextStyle(fontSize: 15, color: Colors.black54),
               ),
               SizedBox(width: MediaQuery.of(context).size.width * .02),
-              const Icon(
-                Icons.done_all_outlined,
-                size: 20,
-                color: Colors.blue,
-              ),
+              widget.message.read.isNotEmpty
+                  ? const Icon(
+                      Icons.done_all_outlined,
+                      size: 20,
+                      color: Colors.blue,
+                    )
+                  : const Icon(
+                      Icons.done,
+                      size: 20,
+                      color: Colors.black45,
+                    ),
               SizedBox(width: MediaQuery.of(context).size.width * .04),
             ],
           ),
@@ -192,11 +230,17 @@ class _MessageCardState extends State<MessageCard> {
           child: Row(
             children: [
               SizedBox(width: MediaQuery.of(context).size.width * .04),
-              const Icon(
-                Icons.done_all_outlined,
-                size: 20,
-                color: Colors.blue,
-              ),
+              widget.message.read.isNotEmpty
+                  ? const Icon(
+                      Icons.done_all_outlined,
+                      size: 20,
+                      color: Colors.blue,
+                    )
+                  : const Icon(
+                      Icons.done,
+                      size: 20,
+                      color: Colors.black45,
+                    ),
               SizedBox(width: MediaQuery.of(context).size.width * .02),
               Text(
                 TimeUntil.getTimeUntil(context, widget.message.send),
@@ -211,7 +255,7 @@ class _MessageCardState extends State<MessageCard> {
           child: Container(
             padding: widget.message.type == Type.image
                 ? null
-                : EdgeInsets.all(MediaQuery.of(context).size.height * .028),
+                : EdgeInsets.all(MediaQuery.of(context).size.height * .019),
             margin: EdgeInsets.symmetric(
                 horizontal: MediaQuery.of(context).size.height * .04,
                 vertical: MediaQuery.of(context).size.height * .01),

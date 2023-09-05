@@ -13,7 +13,9 @@ import 'package:flutter/services.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 class ChatHome extends StatefulWidget {
-  const ChatHome({super.key});
+  const ChatHome({
+    super.key,
+  });
 
   @override
   State<ChatHome> createState() => _ChatHomeState();
@@ -103,8 +105,9 @@ class _ChatHomeState extends State<ChatHome> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(180),
-                      color: Colors.grey),
+                    borderRadius: BorderRadius.circular(180),
+                    color: Colors.black,
+                  ),
                   child: const Icon(
                     CupertinoIcons.person,
                     color: Colors.white,

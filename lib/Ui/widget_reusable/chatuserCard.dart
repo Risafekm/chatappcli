@@ -100,8 +100,8 @@ class _ChatUserCardState extends State<ChatUserCard> {
                       : _message!.read.isEmpty &&
                               _message?.fromId != API.user.uid
                           ? Container(
-                              height: 10,
-                              width: 10,
+                              height: 15,
+                              width: 15,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(100),
                                 color: Colors.greenAccent.shade400,

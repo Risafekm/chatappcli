@@ -257,4 +257,16 @@ class API {
       'push_token': me.pushToken,
     });
   }
+
+  static Future<void> deleteMessage(MessageUser message) async {
+    fireStore
+        .collection('chats/${getConversationID(message.toId)}/messages/')
+        .doc(message.send)
+        .delete();
+
+    //message is image then delete current storage area
+    if (message.type == Type.image) {
+      storage.refFromURL(message.msg).delete();
+    }
+  }
 }

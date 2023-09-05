@@ -299,11 +299,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       shape: const CircleBorder(),
                     ),
                     child: SizedBox(
-                      height: 120,
-                      width: 140,
+                      height: 90,
+                      width: 100,
                       child: Image.asset(
                         'assets/file.png',
-                        scale: 6.3,
+                        scale: 9.3,
                       ),
                     ),
                   ),
@@ -316,11 +316,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       selectCamera();
                     },
                     child: SizedBox(
-                      height: 120,
-                      width: 140,
+                      height: 90,
+                      width: 100,
                       child: Image.asset(
                         'assets/camera.webp',
-                        scale: 5,
+                        scale: 8,
                       ),
                     ),
                   ),
