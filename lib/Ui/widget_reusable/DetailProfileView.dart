@@ -1,7 +1,9 @@
 // ignore_for_file: file_names
 
+import 'package:chat_app_cli/Ui/widget_reusable/viewProfilePic.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/userModel.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class DetailsProfileViewPage extends StatelessWidget {
@@ -13,14 +15,19 @@ class DetailsProfileViewPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        leading: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.black,
-            )),
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+          child: MaterialButton(
+            minWidth: 30,
+            onPressed: () => Navigator.pop(context),
+            color: Colors.white70,
+            shape: const CircleBorder(),
+            child: const Icon(
+              CupertinoIcons.back,
+              size: 26,
+            ),
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         child: Stack(
@@ -33,34 +40,46 @@ class DetailsProfileViewPage extends StatelessWidget {
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 10.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(180),
-                      child: Image.network(
-                        user.image,
-                        width: 200,
-                        height: 200,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (BuildContext context, Widget child,
-                            ImageChunkEvent? loadingProgress) {
-                          if (loadingProgress == null) {
-                            return child;
-                          }
-                          return SizedBox(
-                            height: 180,
-                            width: 180,
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                backgroundColor: Colors.amber,
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
+                    child: GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return FullViewProfile(
+                              user: user,
+                            );
+                          },
+                        );
+                      },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(180),
+                        child: Image.network(
+                          user.image,
+                          width: 200,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (BuildContext context, Widget child,
+                              ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return SizedBox(
+                              height: 180,
+                              width: 180,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  backgroundColor: Colors.amber,
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),

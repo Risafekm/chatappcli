@@ -287,7 +287,7 @@ class _MessagePageState extends State<MessagePage> {
                 height: 43,
                 width: 43,
                 decoration: BoxDecoration(
-                  color: Colors.blue,
+                  color: Colors.blue.shade300,
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Stack(

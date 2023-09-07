@@ -46,7 +46,9 @@ class FullViewProfile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {},
+      onDoubleTap: () {
+        Navigator.of(context).pop();
+      },
       child: SizedBox(
         height: 300,
         width: 300,

@@ -86,6 +86,34 @@ class API {
     }
   }
 
+  // for adding an chat user for our conversation
+  static Future<bool> addChatUser(String email) async {
+    final data = await fireStore
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+
+    log('data: ${data.docs}');
+
+    if (data.docs.isNotEmpty && data.docs.first.id != user.uid) {
+      //user exists
+
+      log('user exists: ${data.docs.first.data()}');
+
+      fireStore
+          .collection('users')
+          .doc(user.uid)
+          .collection('my_users')
+          .doc(data.docs.first.id)
+          .set({});
+
+      return true;
+    } else {
+      //user doesn't exists
+      return false;
+    }
+  }
+
   //to return current user
 
   static Future<bool> userExists() async {
@@ -115,10 +143,17 @@ class API {
   }
   // current user information
 
-  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUser() {
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getAllUsers(
+      List<String> userIds) {
+    log('\nUserIds: $userIds');
+
     return fireStore
         .collection('users')
-        .where('id', isNotEqualTo: user.uid)
+        .where('id',
+            whereIn: userIds.isEmpty
+                ? ['']
+                : userIds) //because empty list throws an error
+        // .where('id', isNotEqualTo: user.uid)
         .snapshots();
   }
 
@@ -258,6 +293,8 @@ class API {
     });
   }
 
+  //delete message function
+
   static Future<void> deleteMessage(MessageUser message) async {
     fireStore
         .collection('chats/${getConversationID(message.toId)}/messages/')
@@ -268,5 +305,35 @@ class API {
     if (message.type == Type.image) {
       storage.refFromURL(message.msg).delete();
     }
+  }
+
+  //update message function
+
+  static Future<void> updateMessage(
+      MessageUser message, String updatedMsg) async {
+    await fireStore
+        .collection('chats/${getConversationID(message.toId)}/messages/')
+        .doc(message.send)
+        .update({'msg': updatedMsg});
+  }
+
+  // for getting id's of known users from firestore database
+  static Stream<QuerySnapshot<Map<String, dynamic>>> getMyUsersId() {
+    return fireStore
+        .collection('users')
+        .doc(user.uid)
+        .collection('my_users')
+        .snapshots();
+  }
+
+  // for adding an user to my user when first message is send
+  static Future<void> sendFirstMessage(
+      ChatUser chatUser, String msg, Type type) async {
+    await fireStore
+        .collection('users')
+        .doc(chatUser.id)
+        .collection('my_users')
+        .doc(user.uid)
+        .set({}).then((value) => sendMessage(chatUser, msg, type));
   }
 }
