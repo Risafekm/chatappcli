@@ -4,6 +4,7 @@ import 'dart:developer';
 
 import 'package:chat_app_cli/Ui/messagePage.dart';
 import 'package:chat_app_cli/Ui/widget_reusable/viewProfilePic.dart';
+import 'package:chat_app_cli/animation/fadePageRoute.dart';
 import 'package:chat_app_cli/api/API.dart';
 import 'package:chat_app_cli/helper/timeUntil.dart';
 import 'package:chat_app_cli/models/messageModel.dart';
@@ -36,8 +37,10 @@ class _ChatUserCardState extends State<ChatUserCard> {
         onTap: () {
           Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => MessagePage(user: widget.user)));
+              FadePageRouteAnimation(
+                  widget: MessagePage(user: widget.user),
+                  curves: Curves.linear,
+                  animationTime: const Duration(milliseconds: 0)));
         },
         child: Container(
             height: 80,

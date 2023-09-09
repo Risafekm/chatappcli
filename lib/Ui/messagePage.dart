@@ -231,7 +231,12 @@ class _MessagePageState extends State<MessagePage> {
           minWidth: 0,
           onPressed: () {
             if (_textController.text.isNotEmpty) {
-              API.sendMessage(widget.user, _textController.text, Type.text);
+              if (_list.isEmpty) {
+                API.sendFirstMessage(
+                    widget.user, _textController.text, Type.text);
+              } else {
+                API.sendMessage(widget.user, _textController.text, Type.text);
+              }
               _textController.text = '';
               log(API.getAllMessage(widget.user) as String);
             }
@@ -318,15 +323,19 @@ class _MessagePageState extends State<MessagePage> {
                         GoogleFonts.acme(color: Colors.black87, fontSize: 18),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    list.isNotEmpty
-                        ? list[0].isOnline
-                            ? 'Online'
-                            : TimeUntil.getLastActiveTime(
-                                context: context,
-                                lastActive: widget.user.lastActive)
-                        : widget.user.about,
-                    style: const TextStyle(color: Colors.black45, fontSize: 14),
+                  Row(
+                    children: [
+                      Text(
+                          list.isNotEmpty
+                              ? list[0].isOnline
+                                  ? 'Online'
+                                  : TimeUntil.getLastActiveTime(
+                                      context: context,
+                                      lastActive: widget.user.lastActive)
+                              : widget.user.about,
+                          style: const TextStyle(
+                              color: Colors.black45, fontSize: 14)),
+                    ],
                   ),
                 ],
               ),

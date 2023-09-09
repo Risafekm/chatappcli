@@ -5,7 +5,6 @@ import 'dart:developer';
 import 'package:chat_app_cli/Services/auth_service.dart';
 import 'package:chat_app_cli/Ui/profilePage.dart';
 import 'package:chat_app_cli/Ui/widget_reusable/chatuserCard.dart';
-import 'package:chat_app_cli/Ui/widget_reusable/snackbarWidget.dart';
 import 'package:chat_app_cli/api/API.dart';
 import 'package:chat_app_cli/models/userModel.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,6 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+import 'widget_reusable/snackbarWidget.dart';
 
 class ChatHome extends StatefulWidget {
   const ChatHome({
@@ -149,6 +150,7 @@ class _ChatHomeState extends State<ChatHome> {
                 child: MaterialButton(
                   minWidth: 30,
                   onPressed: () async {
+                    API.updateActiveStatus(false);
                     await authServices.signOutGoogle(context);
                   },
                   color: Colors.white,
@@ -164,7 +166,7 @@ class _ChatHomeState extends State<ChatHome> {
               showMessageUpdateBox();
             },
             child: const Icon(
-              CupertinoIcons.chat_bubble,
+              Icons.email_sharp,
               color: Colors.white,
             ),
           ),
@@ -191,7 +193,7 @@ class _ChatHomeState extends State<ChatHome> {
                           return const Center(
                             child: CircularProgressIndicator(),
                           );
-                        //all data is loaded
+                        //if some or all data is loaded
                         case ConnectionState.active:
                         case ConnectionState.done:
                           final data = snapshot.data?.docs;
@@ -215,7 +217,7 @@ class _ChatHomeState extends State<ChatHome> {
                             );
                           } else {
                             return const Center(
-                              child: Text('No data'),
+                              child: Text('Add your friends email'),
                             );
                           }
                       }
@@ -235,7 +237,7 @@ class _ChatHomeState extends State<ChatHome> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Container(
+          title: SizedBox(
             height: 120,
             width: MediaQuery.of(context).size.width,
             child: Column(
@@ -270,21 +272,22 @@ class _ChatHomeState extends State<ChatHome> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
+                      padding: const EdgeInsets.only(top: 8.0, bottom: 26.0),
                       child: MaterialButton(
-                        minWidth: 30,
+                        color: Colors.lightGreen,
+                        shape: const CircleBorder(),
+                        minWidth: 35,
                         onPressed: () async {
-                          Navigator.pop(context);
-                          if (email.isNotEmpty)
+                          if (email.isNotEmpty) {
                             await API.addChatUser(email).then((value) {
                               if (!value) {
                                 WidgetSnackBar.snackBarWidget(context,
-                                    message: 'User not found');
+                                    message: 'user not found!');
                               }
+                              Navigator.pop(context);
                             });
+                          }
                         },
-                        color: Colors.lightGreen,
-                        shape: const CircleBorder(),
                         child: const Icon(
                           CupertinoIcons.add,
                           size: 26,
