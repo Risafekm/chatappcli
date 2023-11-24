@@ -74,8 +74,8 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
           const Positioned(
             bottom: 60,
-            right: 170,
-            left: 170,
+            right: 160,
+            left: 160,
             child: Text('Created by Risaf',
                 style: TextStyle(
                     fontSize: 7,

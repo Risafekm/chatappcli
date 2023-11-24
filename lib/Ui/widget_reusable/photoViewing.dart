@@ -50,6 +50,7 @@ class _PhotoViewingState extends State<PhotoViewing> {
                 shape: BoxShape.circle,
                 color: Colors.blue,
                 image: DecorationImage(
+                  fit: BoxFit.cover,
                   image: NetworkImage(API.me.image),
                 ),
               ),
@@ -99,10 +100,14 @@ class _PhotoViewingState extends State<PhotoViewing> {
       ),
       body: GestureDetector(
         child: Center(
-          child: SizedBox(
+          child: Container(
             height: 400,
             width: MediaQuery.of(context).size.width,
-            child: Image.network(widget.msg.msg),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+            child: Image.network(
+              widget.msg.msg,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
       ),

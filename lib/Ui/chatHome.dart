@@ -238,7 +238,7 @@ class _ChatHomeState extends State<ChatHome> {
       builder: (context) {
         return AlertDialog(
           title: SizedBox(
-            height: 120,
+            height: 130,
             width: MediaQuery.of(context).size.width,
             child: Column(
               children: [
